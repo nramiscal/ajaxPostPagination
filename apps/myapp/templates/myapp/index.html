@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        {% load static %}
+        <meta charset="utf-8">
+        <link rel="icon" href="{% static 'img/favicon.ico' %}">
+        <title>index</title>
+        <style media="screen">
+            .post {
+                width: 200px;
+                height: 200px;
+                padding: 20px;
+                background-color: LightSkyBlue ;
+                border: 1px solid black;
+                display: inline-block;
+                vertical-align: top;
+                margin-bottom: 4px;
+            }
+            #large {
+                width: 150px;
+                height: 50px;
+            }
+            #placeholder {
+                width: 820px;
+            }
+        </style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(function(){
+
+                function submitAjaxForm(){
+                    // console.log("in function submitAjaxForm");
+                    // console.log("url:", $('#ajaxForm').attr('action'))
+                    // console.log("method:", $('#ajaxForm').attr('method'))
+                    // console.log("data:", $(this).serialize())
+                    $.ajax({
+                      url: $('#ajaxForm').attr('action'),
+                      method: 'post',
+                      data: $('#ajaxForm').serialize(),
+                      success: function(serverResponse){
+                        $('#placeholder').html(serverResponse);
+                      }
+                    })
+                }
+
+                $('a').click(function(event){
+                  event.preventDefault()
+                  console.log("in $('a').click");
+                  console.log("url:", $(this).attr('href'))
+                  console.log("method: 'post'")
+                  console.log("data:", {
+                      'page_num': $(this).attr('data-value')
+                  })
+                  console.log("$('#placeholder').html(serverResponse)")
+
+                  $.ajax({
+                    url: $(this).attr('href'),
+                    method: 'post',
+                    data: {
+                        'page_num': $(this).attr('data-value')
+                    },
+                    success: function(serverResponse){
+                    $('#placeholder').html(serverResponse);
+                    }
+                  })
+                  // return false;  // so it doesn't go to that link
+                });
+
+
+                $('#ajaxForm').submit(function(event){
+                  // console.log("in $('#ajaxForm').submit")
+                  submitAjaxForm();
+                  event.preventDefault();
+                  $(".setVal").val(""); // to clear out the form input field
+                })
+            });
+
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+
+            <h1>My Posts</h1>
+            <!-- <p>{{posts|safe}}</p> -->
+
+            <div class="page_numbers">
+                {% for page in pages %}
+                <a href="/get_page" data-value='{{page}}'>{{page}}</a>
+                {% endfor %}
+            </div>
+
+            <div id="placeholder">
+                {%for post in posts%}
+                    <div class="post">
+                        <h3>{{post.post}}</h3>
+                    </div>
+                {%endfor%}
+            </div>
+
+            <h2>Add a Post</h2>
+            <form id="ajaxForm" action="/posts_api" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input id="large" class="setVal" type="text" name="post"><br>
+                </div>
+                <input type="submit" class="btn btn-primary" name="" value="Post It!">
+            </form>
+
+
+        </div>
+
+    </body>
+</html>
